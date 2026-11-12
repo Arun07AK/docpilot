@@ -1,18 +1,18 @@
 {
   "256": {
-    "files": 204,
-    "sections": 1580,
-    "chunks": 2723,
-    "tokens": 407620,
-    "serial_s": 0.36,
-    "pool_s": 0.476
+    "files": 179,
+    "sections": 1528,
+    "chunks": 2632,
+    "tokens": 396539,
+    "serial_s": 0.373,
+    "pool_s": 0.51
   },
   "512": {
-    "files": 204,
-    "sections": 1580,
-    "chunks": 1900,
-    "tokens": 394609,
-    "serial_s": 0.215,
-    "pool_s": 0.39
+    "files": 179,
+    "sections": 1528,
+    "chunks": 1837,
+    "tokens": 382979,
+    "serial_s": 0.232,
+    "pool_s": 0.404
   }
 }
