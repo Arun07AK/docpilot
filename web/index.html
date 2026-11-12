@@ -124,7 +124,8 @@ section[hidden]{display:none!important}
 .crumb{font-weight:500;font-size:13.5px;letter-spacing:-.005em}
 .crumb span{color:var(--muted);font-weight:400}
 .src .path{margin-top:2px;color:var(--muted)}
-.snippet{margin-top:8px;color:var(--text-2);font-size:13px;line-height:1.55;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;white-space:pre-line}
+.snippet{margin-top:8px;color:var(--text-2);font-size:13px;line-height:1.55;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+.snippet code{font-family:var(--mono);font-size:.88em;background:var(--sunken);border:1px solid var(--line);border-radius:4px;padding:0 4px}
 .srcfoot{display:flex;align-items:center;gap:14px;margin-top:10px}
 .score{display:flex;align-items:center;gap:8px;color:var(--muted)}
 .score i{display:block;width:64px;height:4px;border-radius:99px;background:var(--sunken);overflow:hidden;position:relative;border:1px solid var(--line)}
@@ -419,7 +420,9 @@ function renderStep(s) {
 
 function md(text) {
   // tiny, safe markdown: fenced code, inline code, bold, paragraphs, citation chips
-  const parts = String(text).split(/```(\w*)\n?([\s\S]*?)```/g);
+  text = String(text);
+  if ((text.match(/```/g) || []).length % 2) text = text.replace(/```\w*/g, "");  // unbalanced fence: render as prose
+  const parts = text.split(/```(\w*)\n?([\s\S]*?)```/g);
   let html = "";
   for (let i = 0; i < parts.length; i++) {
     if (i % 3 === 1) continue;
@@ -441,7 +444,7 @@ function sourceCard(c) {
     <div style="min-width:0">
       <div class="crumb">${crumb}</div>
       <div class="path mono">${esc(c.doc_path)}</div>
-      <div class="snippet">${esc(c.snippet)}</div>
+      <div class="snippet">${esc(c.snippet).replace(/`([^`]+)`/g, "<code>$1</code>")}</div>
       <div class="srcfoot">
         <span class="score mono"><i style="--w:${Math.max(0, Math.min(1, c.score)) * 100}%"></i>${c.score.toFixed(2)}</span>
         <a class="ext" href="${esc(c.url)}" target="_blank" rel="noopener">Open in docs ↗</a>
@@ -481,6 +484,7 @@ async function ask() {
   if (question.length < 3) return $("#q").focus();
   inflight?.abort(); inflight = new AbortController();
   document.body.classList.add("asked");
+  history.replaceState(null, "", "#ask?q=" + encodeURIComponent(question));
   $("#ask-btn").disabled = true;
   shell(question);
   const steps = [];
@@ -679,7 +683,12 @@ $("#m-refresh").onclick = loadMetrics;
 /* ---------------- boot ---------------- */
 loadHealth(); loadSchemas();
 setInterval(loadHealth, 20000);
-const route = () => go((location.hash || "#ask").slice(1).replace(/[^a-z]/g, "") || "ask");
+const route = () => {
+  const [view, qs] = (location.hash || "#ask").slice(1).split("?");
+  go(view.replace(/[^a-z]/g, "") || "ask");
+  const q = new URLSearchParams(qs || "").get("q");  // shareable: /#ask?q=How%20do%20I...
+  if (q && view === "ask") { $("#q").value = q; ask(); }
+};
 addEventListener("hashchange", route); route();
 </script>
 </body>

@@ -134,7 +134,7 @@ def build_graph(retriever):
         hits, rel = state["hits"], state["relevant"]
         if not llm.available():
             keep = [hits[i - 1] for i in rel[:3]]
-            text = "\n\n".join(f"{h['text'].split(chr(10), 2)[-1].strip()[:600]} [{n}]" for n, h in enumerate(keep, 1))
+            text = "\n\n".join(f"{excerpt(h['text'])} [{n}]" for n, h in enumerate(keep, 1))
             return {"answer": text, "citations": _cites(keep), "refused": False, "mode": "extractive",
                     "trace": _step(state, "answer", t0, mode="extractive")}
         msgs = [{"role": "system", "content": ANSWER_SYSTEM},
@@ -189,7 +189,35 @@ def build_graph(retriever):
 def _cites(hits: list[dict]) -> list[dict]:
     return [{"n": i, "id": h["id"], "doc_path": h["doc_path"], "heading_path": h["heading_path"],
              "url": doc_url(h["doc_path"], h["heading_path"]), "score": round(h["score"], 3),
-             "snippet": h["text"].split("\n", 2)[-1].strip()[:400]} for i, h in enumerate(hits, 1)]
+             "snippet": excerpt(h["text"], 300)} for i, h in enumerate(hits, 1)]
+
+
+def excerpt(chunk_text: str, limit: int = 420) -> str:
+    """Readable prose from a chunk for extractive answers: no code, whole sentences only.
+
+    A chunk window can start mid-sentence or inside a code fence (it is a token
+    window with overlap), so: drop the heading prefix, drop fenced code (and any
+    dangling half fence), skip a leading fragment, and cut at a sentence end.
+    """
+    body = chunk_text.split("\n\n", 1)[-1]
+    body = re.sub(r"```.*?```", " ", body, flags=re.S)
+    if body.count("```") % 2:  # window started inside a fence: drop everything up to its close
+        body = body.split("```", 1)[1]
+    body = body.replace("```", " ")
+    body = re.sub(r"\[([^\]]+)\]\[[^\]]*\]|\[([^\]]+)\]\([^)]*\)", lambda m: m.group(1) or m.group(2), body)
+    lines = [re.sub(r"^[*-]\s+", "• ", l.strip()) for l in body.splitlines()
+             if l.strip() and not l.strip().startswith(("#", ">>>", "|"))]
+    prose = re.sub(r"\s+", " ", " ".join(lines)).strip()
+    if not prose[:1].isupper():  # window began mid-sentence: start at the next sentence
+        m = re.search(r"[.!?]\s+(?=[A-Z])", prose)
+        if m and m.end() < len(prose) // 2:
+            prose = prose[m.end():]
+    if prose.count("`") % 2:  # an unpaired backtick would flip every inline-code span after it
+        prose = prose.replace("`", "")
+    if len(prose) > limit:
+        cut = max(prose.rfind(". ", 0, limit), prose.rfind(": ", 0, limit))
+        prose = prose[: cut + 1] if cut > 80 else prose[:limit].rsplit(" ", 1)[0] + "…"
+    return prose or chunk_text.split("\n\n", 1)[-1][:limit]
 
 
 def _slug(s: str) -> str:
