@@ -27,7 +27,7 @@ faiss.omp_set_num_threads(1)
 
 
 def _int_id(hex_id: str) -> int:
-    return int(hex_id[:15], 16)  # 60 bits: fits a signed int64
+    return int(hex_id[:16], 16) & 0x7FFF_FFFF_FFFF_FFFF  # all 16 hex chars, masked to a positive int64
 
 
 class FaissStore(VectorStore):

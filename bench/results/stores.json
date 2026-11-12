@@ -1,0 +1,22 @@
+[
+  {
+    "backend": "faiss",
+    "vectors": 2632,
+    "dim": 384,
+    "build_s": 0.021,
+    "query_p50_ms": 0.064,
+    "query_p95_ms": 0.069,
+    "disk_mb": 6.78,
+    "queries": 500
+  },
+  {
+    "backend": "chroma",
+    "vectors": 2632,
+    "dim": 384,
+    "build_s": 1.543,
+    "query_p50_ms": 0.864,
+    "query_p95_ms": 0.959,
+    "disk_mb": 31.77,
+    "queries": 500
+  }
+]

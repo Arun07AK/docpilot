@@ -225,6 +225,17 @@ def create_app(svc: DocPilot | None = None) -> FastAPI:
         return {"window_hours": hours, **m, "recent": recent, "cache_backend": s.cache.backend,
                 "backend": s.store.name, "chunks": s.store.count()}
 
+    @app.get("/bench")
+    async def bench():
+        """Measured results written by eval/ and bench/ scripts (empty until they run)."""
+        out = {}
+        for p in sorted((WEB.parent / "bench" / "results").glob("*.json")):
+            try:
+                out[p.stem] = json.loads(p.read_text())
+            except ValueError:
+                continue
+        return out
+
     @app.post("/cache/flush")
     async def flush(request: Request):
         s = S(request)
@@ -248,8 +259,10 @@ async def _run_ingest(app: FastAPI, job_id: str, workers: int | None) -> None:
 
     async with app.state.ingest_lock:
         try:
-            stats = await ingest(s.store, s.embedder, workers=workers, on_progress=progress,
-                                 on_chunks=lambda chunks: s.repo.save_chunks(chunks, settings.chunk_tokens))
+            cfg = s.ingest_cfg
+            stats = await ingest(s.store, s.embedder, cfg["chunk_tokens"], cfg["overlap"], workers=workers,
+                                 corpus_dir=cfg["corpus_dir"], on_progress=progress,
+                                 on_chunks=lambda chunks: s.repo.save_chunks(chunks, cfg["chunk_tokens"]))
             job.update(status="done", stage="done", result={
                 "files": stats.files, "sections": stats.sections, "chunks": stats.chunks, "new": stats.new,
                 "skipped": stats.skipped, "removed": stats.removed,

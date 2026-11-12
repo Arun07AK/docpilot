@@ -42,6 +42,9 @@ class DocPilot:
         self.store, self.embedder, self.cache, self.repo = store, embedder, cache, repo
         self.graph = build_graph(self.retrieve)
         self.jobs: dict[str, dict] = {}
+        # what POST /ingest builds: the configured chunking over the configured corpus
+        self.ingest_cfg = {"chunk_tokens": settings.chunk_tokens, "overlap": settings.chunk_overlap,
+                           "corpus_dir": None}
 
     # ------------------------------------------------------------- retrieval
     async def retrieve(self, query: str, k: int | None = None) -> list[dict]:

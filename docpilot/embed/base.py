@@ -32,6 +32,7 @@ class Embedder:
         self.batch_size = batch_size
         self.concurrency = concurrency
         self.cache = cache  # async get_many(keys)->list|None, set_many(dict)
+        self.sort_by_length = True  # see embed(); measured 23.4 s -> 18.9 s cold ingest
 
     async def _embed_batch(self, texts: list[str]) -> np.ndarray:  # pragma: no cover
         raise NotImplementedError
@@ -53,6 +54,11 @@ class Embedder:
                 else:
                     todo.append(i)
 
+        if self.sort_by_length:
+            # Transformers pad every batch to its longest text. In document order a 64-text batch mixes
+            # 20- and 256-token chunks: 1.45x the real tokens were padding. Length-sorted batches: 1.02x.
+            # Results are written back by original index, so callers see the same order.
+            todo.sort(key=lambda i: len(texts[i]))
         batches = [todo[i:i + self.batch_size] for i in range(0, len(todo), self.batch_size)]
         sem = asyncio.Semaphore(self.concurrency)
         done = 0

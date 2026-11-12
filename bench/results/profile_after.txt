@@ -1,0 +1,33 @@
+         6128921 function calls (5988158 primitive calls) in 19.618 seconds
+
+   Ordered by: cumulative time
+   List reduced from 1064 to 25 due to restriction <25>
+
+   ncalls  tottime  percall  cumtime  percall filename:lineno(function)
+       42    0.000    0.000   18.893    0.450 /Users/arunak/docpilot/.venv/lib/python3.12/site-packages/sentence_transformers/sentence_transformer/model.py:767(encode)
+       42    0.000    0.000   18.893    0.450 /Users/arunak/docpilot/.venv/lib/python3.12/site-packages/torch/utils/_contextlib.py:154(inference_mode)
+       42    0.002    0.000   18.839    0.449 /Users/arunak/docpilot/.venv/lib/python3.12/site-packages/sentence_transformers/sentence_transformer/model.py:934(_inference)
+  4872/42    0.008    0.000   18.180    0.433 /Users/arunak/docpilot/.venv/lib/python3.12/site-packages/torch/nn/modules/module.py:1783(_wrapped_call_impl)
+  4872/42    0.200    0.000   18.180    0.433 /Users/arunak/docpilot/.venv/lib/python3.12/site-packages/torch/nn/modules/module.py:1791(_call_impl)
+       42    0.000    0.000   18.180    0.433 /Users/arunak/docpilot/.venv/lib/python3.12/site-packages/sentence_transformers/base/model.py:627(forward)
+       42    0.001    0.000   18.125    0.432 /Users/arunak/docpilot/.venv/lib/python3.12/site-packages/sentence_transformers/base/modules/transformer.py:1636(forward)
+       42    0.000    0.000   18.124    0.432 /Users/arunak/docpilot/.venv/lib/python3.12/site-packages/transformers/utils/generic.py:1019(wrapper)
+       42    0.012    0.000   18.123    0.431 /Users/arunak/docpilot/.venv/lib/python3.12/site-packages/transformers/utils/output_capturing.py:250(wrapper)
+       42    0.000    0.000   18.105    0.431 /Users/arunak/docpilot/.venv/lib/python3.12/site-packages/transformers/models/bert/modeling_bert.py:620(forward)
+      252    0.001    0.000   17.848    0.071 /Users/arunak/docpilot/.venv/lib/python3.12/site-packages/transformers/modeling_layers.py:82(__call__)
+       42    0.043    0.001   17.806    0.424 /Users/arunak/docpilot/.venv/lib/python3.12/site-packages/transformers/models/bert/modeling_bert.py:425(forward)
+      252    0.001    0.000   17.800    0.071 /Users/arunak/docpilot/.venv/lib/python3.12/site-packages/transformers/models/bert/modeling_bert.py:374(forward)
+     1554    0.002    0.000   11.544    0.007 /Users/arunak/docpilot/.venv/lib/python3.12/site-packages/torch/nn/modules/linear.py:130(forward)
+     1554   11.541    0.007   11.541    0.007 {built-in method torch._C._nn.linear}
+      252    0.165    0.001    9.571    0.038 /Users/arunak/docpilot/.venv/lib/python3.12/site-packages/transformers/pytorch_utils.py:124(apply_chunking_to_forward)
+      252    0.001    0.000    9.392    0.037 /Users/arunak/docpilot/.venv/lib/python3.12/site-packages/transformers/models/bert/modeling_bert.py:413(feed_forward_chunk)
+      252    0.043    0.000    8.227    0.033 /Users/arunak/docpilot/.venv/lib/python3.12/site-packages/transformers/models/bert/modeling_bert.py:304(forward)
+      252    0.007    0.000    6.491    0.026 /Users/arunak/docpilot/.venv/lib/python3.12/site-packages/transformers/models/bert/modeling_bert.py:164(forward)
+      252    0.186    0.001    5.600    0.022 /Users/arunak/docpilot/.venv/lib/python3.12/site-packages/transformers/models/bert/modeling_bert.py:334(forward)
+      252    0.266    0.001    3.788    0.015 /Users/arunak/docpilot/.venv/lib/python3.12/site-packages/transformers/models/bert/modeling_bert.py:347(forward)
+      252    0.003    0.000    3.282    0.013 /Users/arunak/docpilot/.venv/lib/python3.12/site-packages/transformers/integrations/sdpa_attention.py:80(sdpa_attention_forward)
+      252    3.276    0.013    3.276    0.013 {built-in method torch._C._nn.scaled_dot_product_attention}
+    87/11    0.034    0.000    2.810    0.255 /Users/arunak/docpilot/.venv/lib/python3.12/site-packages/torch/autograd/grad_mode.py:294(__exit__)
+      4/3    0.000    0.000    2.110    0.703 /Users/arunak/docpilot/.venv/lib/python3.12/site-packages/sentence_transformers/util/decorators.py:34(wrapper)
+
+

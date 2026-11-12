@@ -1,0 +1,29 @@
+[
+  {
+    "corpus_x": 1,
+    "files": 203,
+    "chunks": 2666,
+    "workers": 11,
+    "serial_s": 0.26,
+    "pool_s": 0.416,
+    "speedup": 0.62
+  },
+  {
+    "corpus_x": 4,
+    "files": 812,
+    "chunks": 3245,
+    "workers": 11,
+    "serial_s": 1.108,
+    "pool_s": 0.615,
+    "speedup": 1.8
+  },
+  {
+    "corpus_x": 16,
+    "files": 3248,
+    "chunks": 5561,
+    "workers": 11,
+    "serial_s": 3.893,
+    "pool_s": 1.13,
+    "speedup": 3.44
+  }
+]

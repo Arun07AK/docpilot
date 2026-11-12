@@ -8,7 +8,7 @@
     "mrr": 0.596,
     "n": 50,
     "chunks": 2632,
-    "search_ms": 0.093
+    "search_ms": 0.069
   },
   {
     "backend": "chroma",
@@ -19,7 +19,7 @@
     "mrr": 0.596,
     "n": 50,
     "chunks": 2632,
-    "search_ms": 1.757
+    "search_ms": 1.949
   },
   {
     "backend": "faiss",
@@ -41,6 +41,6 @@
     "mrr": 0.62,
     "n": 50,
     "chunks": 1837,
-    "search_ms": 1.517
+    "search_ms": 1.573
   }
 ]

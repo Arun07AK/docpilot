@@ -1,1 +1,686 @@
-<!doctype html><title>DocPilot</title><p>UI coming
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>DocPilot</title>
+<meta name="description" content="Cited answers over the FastAPI and Pydantic docs.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%23111'/%3E%3Cpath d='M10 9h6.5a7 7 0 010 14H10z' fill='none' stroke='%23fff' stroke-width='2.4'/%3E%3Ccircle cx='16' cy='16' r='2.2' fill='%236366f1'/%3E%3C/svg%3E">
+<style>
+:root{
+  --bg:#fafaf9; --surface:#ffffff; --sunken:#f4f4f3; --line:#e7e5e4; --line-strong:#d6d3d1;
+  --text:#18181b; --text-2:#52525b; --muted:#8a8a93; --accent:#4f46e5; --accent-soft:#eef2ff; --accent-line:#c7d2fe;
+  --ok:#15803d; --ok-soft:#ecfdf3; --warn:#b45309; --warn-soft:#fffbeb; --warn-line:#fde68a; --bad:#b91c1c;
+  --shadow:0 1px 2px rgba(16,16,20,.04),0 4px 16px rgba(16,16,20,.04);
+  --radius:12px; --mono:"JetBrains Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+  --sans:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;
+  color-scheme:light;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#0b0b0c; --surface:#131315; --sunken:#0f0f11; --line:#232327; --line-strong:#303036;
+  --text:#ececee; --text-2:#b4b4bb; --muted:#7c7c85; --accent:#818cf8; --accent-soft:#1b1b33; --accent-line:#33335a;
+  --ok:#4ade80; --ok-soft:#0f2417; --warn:#fbbf24; --warn-soft:#211a0b; --warn-line:#4a3a12; --bad:#f87171;
+  --shadow:0 1px 2px rgba(0,0,0,.4); color-scheme:dark;}}
+:root[data-theme="dark"]{
+  --bg:#0b0b0c; --surface:#131315; --sunken:#0f0f11; --line:#232327; --line-strong:#303036;
+  --text:#ececee; --text-2:#b4b4bb; --muted:#7c7c85; --accent:#818cf8; --accent-soft:#1b1b33; --accent-line:#33335a;
+  --ok:#4ade80; --ok-soft:#0f2417; --warn:#fbbf24; --warn-soft:#211a0b; --warn-line:#4a3a12; --bad:#f87171;
+  --shadow:0 1px 2px rgba(0,0,0,.4); color-scheme:dark;}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--text);font:14px/1.6 var(--sans);-webkit-font-smoothing:antialiased;font-feature-settings:"cv11","ss01"}
+button,input,select,textarea{font:inherit;color:inherit}
+a{color:inherit}
+.mono{font-family:var(--mono);font-size:12px;letter-spacing:-.01em}
+.muted{color:var(--muted)}
+::selection{background:var(--accent-soft)}
+
+/* ---------- top bar ---------- */
+header{position:sticky;top:0;z-index:20;background:color-mix(in srgb,var(--bg) 82%,transparent);backdrop-filter:saturate(160%) blur(12px);border-bottom:1px solid var(--line)}
+.topbar{max-width:1200px;margin:0 auto;height:56px;padding:0 24px;display:flex;align-items:center;gap:28px}
+.brand{display:flex;align-items:center;gap:10px;font-weight:600;letter-spacing:-.02em;font-size:15px;text-decoration:none}
+.brand svg{display:block}
+nav{display:flex;gap:2px}
+nav button{border:0;background:none;padding:6px 12px;border-radius:8px;color:var(--text-2);cursor:pointer;font-weight:500;font-size:13.5px}
+nav button:hover{color:var(--text);background:var(--sunken)}
+nav button[aria-selected="true"]{color:var(--text);background:var(--sunken);box-shadow:inset 0 0 0 1px var(--line)}
+.status{margin-left:auto;display:flex;align-items:center;gap:14px}
+.chip{display:inline-flex;align-items:center;gap:6px;color:var(--text-2);font-size:12px;white-space:nowrap}
+.dot{width:6px;height:6px;border-radius:50%;background:var(--muted)}
+.dot.on{background:var(--ok);box-shadow:0 0 0 3px color-mix(in srgb,var(--ok) 18%,transparent)}
+.dot.off{background:var(--bad)}
+.iconbtn{border:1px solid var(--line);background:var(--surface);width:30px;height:30px;border-radius:8px;display:grid;place-items:center;cursor:pointer;color:var(--text-2)}
+.iconbtn:hover{color:var(--text);border-color:var(--line-strong)}
+
+main{max-width:1200px;margin:0 auto;padding:0 24px 80px}
+section[hidden]{display:none!important}
+
+/* ---------- ask: hero + composer ---------- */
+.hero{padding:96px 0 28px;text-align:center;transition:padding .35s ease}
+.hero h1{margin:0;font-size:40px;line-height:1.1;font-weight:600;letter-spacing:-.035em}
+.hero p{margin:14px auto 0;max-width:560px;color:var(--text-2);font-size:15.5px}
+.asked .hero{padding:28px 0 0}
+.asked .hero h1,.asked .hero p,.asked .examples{display:none}
+.composer{max-width:760px;margin:30px auto 0;position:relative}
+.asked .composer{margin-top:0;max-width:none}
+.field{display:flex;align-items:center;gap:10px;background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:6px 6px 6px 18px;box-shadow:var(--shadow);transition:border-color .15s,box-shadow .15s}
+.field:focus-within{border-color:var(--accent-line);box-shadow:0 0 0 4px color-mix(in srgb,var(--accent) 10%,transparent),var(--shadow)}
+.field input{flex:1;border:0;outline:0;background:none;font-size:16px;padding:10px 0;min-width:0}
+.field input::placeholder{color:var(--muted)}
+.kbd{font-family:var(--mono);font-size:11px;color:var(--muted);border:1px solid var(--line);border-bottom-width:2px;border-radius:5px;padding:1px 6px}
+.primary{border:0;background:var(--text);color:var(--bg);border-radius:10px;padding:9px 16px;font-weight:500;cursor:pointer;display:inline-flex;align-items:center;gap:8px;white-space:nowrap}
+.primary:hover{opacity:.88}
+.primary:disabled{opacity:.4;cursor:default}
+.ghost{border:1px solid var(--line);background:var(--surface);border-radius:10px;padding:8px 14px;font-weight:500;cursor:pointer;color:var(--text-2)}
+.ghost:hover{color:var(--text);border-color:var(--line-strong)}
+.opts{display:flex;justify-content:space-between;align-items:center;margin-top:10px;padding:0 4px;color:var(--muted);font-size:12.5px}
+.toggle{display:inline-flex;align-items:center;gap:8px;cursor:pointer;user-select:none}
+.toggle input{appearance:none;width:28px;height:16px;border-radius:99px;background:var(--line-strong);position:relative;margin:0;cursor:pointer;transition:background .15s}
+.toggle input::after{content:"";position:absolute;top:2px;left:2px;width:12px;height:12px;border-radius:50%;background:#fff;transition:transform .15s}
+.toggle input:checked{background:var(--accent)}
+.toggle input:checked::after{transform:translateX(12px)}
+.examples{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;max-width:760px;margin:22px auto 0}
+.example{border:1px solid var(--line);background:var(--surface);color:var(--text-2);border-radius:99px;padding:6px 13px;font-size:13px;cursor:pointer;transition:all .15s}
+.example:hover{color:var(--text);border-color:var(--line-strong);transform:translateY(-1px)}
+.example.ooc{border-style:dashed}
+.notice{max-width:760px;margin:18px auto 0;font-size:12.5px;color:var(--text-2);display:flex;gap:8px;align-items:center;justify-content:center}
+
+/* ---------- ask: result layout ---------- */
+.result{display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:28px;margin-top:22px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow)}
+.answer{padding:24px 26px}
+.qline{font-size:13px;color:var(--muted);margin-bottom:10px;display:flex;gap:8px;align-items:center}
+.answer-body{font-size:15.5px;line-height:1.72;color:var(--text)}
+.answer-body p{margin:0 0 12px}
+.answer-body p:last-child{margin-bottom:0}
+.answer-body code{font-family:var(--mono);font-size:.86em;background:var(--sunken);border:1px solid var(--line);border-radius:5px;padding:1px 5px}
+.answer-body pre{background:var(--sunken);border:1px solid var(--line);border-radius:10px;padding:14px 16px;overflow:auto;margin:12px 0}
+.answer-body pre code{background:none;border:0;padding:0;font-size:12.5px;line-height:1.6}
+.cite{display:inline-flex;align-items:center;justify-content:center;min-width:18px;height:18px;padding:0 5px;margin:0 1px;border-radius:5px;background:var(--accent-soft);color:var(--accent);border:1px solid var(--accent-line);font:500 11px/1 var(--mono);vertical-align:2px;cursor:pointer;text-decoration:none;transition:all .12s}
+.cite:hover,.cite.hl{background:var(--accent);color:#fff;border-color:var(--accent)}
+.metaline{display:flex;flex-wrap:wrap;gap:6px 18px;margin-top:20px;padding-top:16px;border-top:1px solid var(--line);color:var(--muted);font-size:12px}
+.metaline b{color:var(--text-2);font-weight:500}
+.pill{display:inline-flex;align-items:center;gap:5px;font:500 11px/1 var(--mono);padding:4px 7px;border-radius:6px;border:1px solid var(--line);color:var(--text-2);background:var(--sunken)}
+.pill.hit{color:var(--ok);background:var(--ok-soft);border-color:color-mix(in srgb,var(--ok) 25%,transparent)}
+.pill.miss{color:var(--text-2)}
+.pill.warn{color:var(--warn);background:var(--warn-soft);border-color:var(--warn-line)}
+.copy{cursor:pointer;border-bottom:1px dashed var(--line-strong)}
+
+.refusal{border-color:var(--warn-line);background:linear-gradient(180deg,var(--warn-soft),var(--surface) 70%)}
+.refusal h3{margin:0 0 6px;font-size:16px;font-weight:600;display:flex;align-items:center;gap:10px;letter-spacing:-.01em}
+.refusal p{margin:0;color:var(--text-2)}
+.nearest{margin-top:16px;display:grid;gap:6px}
+.nearest a{display:flex;justify-content:space-between;gap:12px;text-decoration:none;font-size:13px;padding:8px 12px;border:1px solid var(--line);border-radius:9px;background:var(--surface)}
+.nearest a:hover{border-color:var(--line-strong)}
+
+.sources-h{display:flex;align-items:baseline;justify-content:space-between;margin:28px 2px 10px}
+.sources-h h4,.side h4{margin:0;font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
+.sources{display:grid;gap:10px}
+.src{padding:14px 16px;display:grid;grid-template-columns:28px 1fr;gap:12px;transition:border-color .15s,box-shadow .15s}
+.src.hl{border-color:var(--accent-line);box-shadow:0 0 0 3px color-mix(in srgb,var(--accent) 9%,transparent)}
+.src .n{width:24px;height:24px;border-radius:7px;display:grid;place-items:center;background:var(--accent-soft);color:var(--accent);font:600 12px/1 var(--mono);border:1px solid var(--accent-line)}
+.crumb{font-weight:500;font-size:13.5px;letter-spacing:-.005em}
+.crumb span{color:var(--muted);font-weight:400}
+.src .path{margin-top:2px;color:var(--muted)}
+.snippet{margin-top:8px;color:var(--text-2);font-size:13px;line-height:1.55;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;white-space:pre-line}
+.srcfoot{display:flex;align-items:center;gap:14px;margin-top:10px}
+.score{display:flex;align-items:center;gap:8px;color:var(--muted)}
+.score i{display:block;width:64px;height:4px;border-radius:99px;background:var(--sunken);overflow:hidden;position:relative;border:1px solid var(--line)}
+.score i::after{content:"";position:absolute;inset:0;width:var(--w);background:var(--accent);border-radius:99px}
+.ext{font-size:12px;color:var(--text-2);text-decoration:none;margin-left:auto}
+.ext:hover{color:var(--accent)}
+
+/* ---------- trace ---------- */
+.side{position:sticky;top:76px;align-self:start}
+.trace{padding:18px 18px 8px;margin-top:10px}
+.steps{list-style:none;margin:0;padding:0;position:relative}
+.step{display:grid;grid-template-columns:20px 1fr auto;gap:10px;padding:0 0 16px;position:relative;animation:in .25s ease both}
+.step::before{content:"";position:absolute;left:9.5px;top:22px;bottom:2px;width:1px;background:var(--line)}
+.step:last-child::before{display:none}
+.ico{width:20px;height:20px;border-radius:50%;display:grid;place-items:center;border:1px solid var(--line-strong);background:var(--surface);color:var(--muted)}
+.ico svg{width:11px;height:11px}
+.step.done .ico{background:var(--text);border-color:var(--text);color:var(--bg)}
+.step.refuse .ico{background:var(--warn);border-color:var(--warn);color:#fff}
+.step.rewrite .ico{background:var(--accent);border-color:var(--accent);color:#fff}
+.step.run .ico{border-color:var(--accent)}
+.step.run .ico::after{content:"";width:8px;height:8px;border-radius:50%;background:var(--accent);animation:pulse 1s ease-in-out infinite}
+.sname{font-weight:500;font-size:13px;text-transform:capitalize}
+.sdesc{color:var(--muted);font-size:12px;line-height:1.45;margin-top:1px;word-break:break-word}
+.sms{color:var(--muted);font:11px var(--mono);padding-top:2px}
+.summary-grid{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--line);border-top:1px solid var(--line);margin:4px -18px 0;border-radius:0 0 var(--radius) var(--radius);overflow:hidden}
+.summary-grid div{background:var(--surface);padding:10px 14px}
+.summary-grid b{display:block;font:500 15px/1.3 var(--sans);letter-spacing:-.01em}
+.summary-grid span{font-size:11px;color:var(--muted)}
+@keyframes in{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+@keyframes pulse{50%{opacity:.25}}
+.skeleton{height:12px;border-radius:6px;background:linear-gradient(90deg,var(--sunken),var(--line),var(--sunken));background-size:200% 100%;animation:shimmer 1.2s linear infinite;margin:10px 0}
+@keyframes shimmer{to{background-position:-200% 0}}
+
+/* ---------- generic panels ---------- */
+.page-h{padding:44px 0 22px;display:flex;align-items:end;justify-content:space-between;gap:20px}
+.page-h h2{margin:0;font-size:26px;letter-spacing:-.03em;font-weight:600}
+.page-h p{margin:6px 0 0;color:var(--text-2)}
+.two{display:grid;grid-template-columns:340px minmax(0,1fr);gap:24px}
+.panel{padding:18px}
+label.lbl{display:block;font-size:12px;font-weight:500;color:var(--text-2);margin:0 0 6px}
+.input,select.input{width:100%;border:1px solid var(--line);background:var(--surface);border-radius:10px;padding:9px 12px;outline:0;transition:border-color .15s}
+.input:focus{border-color:var(--accent-line);box-shadow:0 0 0 3px color-mix(in srgb,var(--accent) 10%,transparent)}
+.doclist{margin-top:10px;max-height:420px;overflow:auto;border:1px solid var(--line);border-radius:10px;background:var(--sunken)}
+.docgrp{position:sticky;top:0;background:var(--sunken);padding:8px 12px 4px;font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.doc{display:block;width:100%;text-align:left;border:0;background:none;padding:7px 12px;cursor:pointer;border-radius:0;font-size:13px}
+.doc:hover{background:var(--surface)}
+.doc[aria-selected="true"]{background:var(--surface);box-shadow:inset 2px 0 0 var(--accent)}
+.doc small{display:block;color:var(--muted);font:11px var(--mono)}
+.seg{display:inline-flex;padding:3px;border-radius:10px;background:var(--sunken);border:1px solid var(--line);gap:2px}
+.seg button{border:0;background:none;padding:6px 12px;border-radius:7px;cursor:pointer;color:var(--text-2);font-weight:500;font-size:13px}
+.seg button[aria-selected="true"]{background:var(--surface);color:var(--text);box-shadow:0 1px 2px rgba(0,0,0,.08),0 0 0 1px var(--line)}
+.row{display:flex;gap:10px;align-items:center}
+.stack{display:grid;gap:14px}
+.empty{display:grid;place-items:center;text-align:center;padding:64px 24px;color:var(--muted)}
+.empty svg{opacity:.5;margin-bottom:12px}
+.out{padding:24px 26px}
+.out h3{margin:0 0 4px;font-size:17px;letter-spacing:-.02em}
+.out .lead{font-size:15px;line-height:1.7;margin:14px 0 18px}
+.points{margin:0;padding:0;list-style:none;display:grid;gap:8px}
+.points li{display:grid;grid-template-columns:18px 1fr;gap:8px;color:var(--text-2)}
+.points li::before{content:"";width:6px;height:6px;border-radius:2px;background:var(--accent);margin-top:9px}
+pre.json{margin:0;background:var(--sunken);border:1px solid var(--line);border-radius:10px;padding:16px 18px;overflow:auto;font:12.5px/1.65 var(--mono)}
+.j-k{color:var(--accent)} .j-s{color:var(--ok)} .j-n{color:var(--warn)} .j-b{color:var(--bad)} .j-null{color:var(--muted)}
+.err{color:var(--bad);font-size:13px;margin-top:10px}
+
+/* ---------- metrics ---------- */
+.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--line);border:1px solid var(--line);border-radius:var(--radius);overflow:hidden;box-shadow:var(--shadow)}
+.kpi{background:var(--surface);padding:18px 20px}
+.kpi span{font-size:12px;color:var(--muted)}
+.kpi b{display:block;font-size:26px;font-weight:600;letter-spacing:-.03em;margin-top:4px;font-feature-settings:"tnum"}
+.kpi b small{font-size:13px;color:var(--muted);font-weight:500;margin-left:2px}
+.kpi em{font-style:normal;font-size:12px;color:var(--text-2)}
+.block-h{display:flex;align-items:baseline;justify-content:space-between;margin:34px 2px 12px}
+.block-h h3{margin:0;font-size:15px;font-weight:600;letter-spacing:-.01em}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th{text-align:left;font-weight:500;color:var(--muted);font-size:12px;padding:10px 16px;border-bottom:1px solid var(--line);white-space:nowrap}
+td{padding:10px 16px;border-bottom:1px solid var(--line);vertical-align:middle}
+tr:last-child td{border-bottom:0}
+td.num,th.num{text-align:right;font-feature-settings:"tnum";font-family:var(--mono);font-size:12px}
+.meter{display:flex;align-items:center;gap:10px}
+.meter i{flex:1;height:6px;background:var(--sunken);border:1px solid var(--line);border-radius:99px;position:relative;overflow:hidden;min-width:60px}
+.meter i::after{content:"";position:absolute;inset:0;width:var(--w);background:var(--accent);border-radius:99px}
+.trunc{max-width:420px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+footer{max-width:1200px;margin:0 auto;padding:22px 24px 40px;color:var(--muted);font-size:12px;display:flex;justify-content:space-between;border-top:1px solid var(--line)}
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--text);color:var(--bg);padding:8px 14px;border-radius:9px;font-size:13px;opacity:0;transition:all .2s;pointer-events:none;z-index:50}
+.toast.on{opacity:1;transform:translateX(-50%)}
+
+@media (max-width:900px){
+  .result,.two{grid-template-columns:1fr}
+  .side{position:static}
+  .kpis{grid-template-columns:repeat(2,1fr)}
+  .status .chip:not(.keep){display:none}
+  .topbar{gap:14px;padding:0 16px} main{padding:0 16px 60px}
+  .hero{padding-top:56px}.hero h1{font-size:30px}
+}
+</style>
+</head>
+<body>
+<header>
+  <div class="topbar">
+    <a class="brand" href="#ask" data-go="ask" aria-label="DocPilot home">
+      <svg width="22" height="22" viewBox="0 0 32 32" aria-hidden="true"><rect width="32" height="32" rx="8" fill="currentColor"/><path d="M10 9h6.5a7 7 0 010 14H10z" fill="none" stroke="var(--bg)" stroke-width="2.4"/><circle cx="16" cy="16" r="2.2" fill="#6366f1"/></svg>
+      DocPilot
+    </a>
+    <nav role="tablist">
+      <button role="tab" data-go="ask" aria-selected="true">Ask</button>
+      <button role="tab" data-go="summarize">Summarize</button>
+      <button role="tab" data-go="extract">Extract</button>
+      <button role="tab" data-go="metrics">Metrics</button>
+    </nav>
+    <div class="status" id="status">
+      <span class="chip keep"><span class="dot" id="s-index"></span><span id="s-index-t" class="mono">index</span></span>
+      <span class="chip"><span class="dot" id="s-redis"></span>Redis</span>
+      <span class="chip"><span class="dot" id="s-pg"></span>Postgres</span>
+      <span class="chip"><span class="dot" id="s-llm"></span><span id="s-llm-t">LLM</span></span>
+      <button class="iconbtn" id="theme" title="Toggle theme" aria-label="Toggle theme">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.8A9 9 0 1111.2 3a7 7 0 009.8 9.8z"/></svg>
+      </button>
+    </div>
+  </div>
+</header>
+
+<main>
+  <!-- ================= ASK ================= -->
+  <section id="v-ask">
+    <div class="hero">
+      <h1>Ask the FastAPI &amp; Pydantic docs.</h1>
+      <p>Every claim is cited to a section. When the docs don't hold the answer, DocPilot says so instead of guessing.</p>
+    </div>
+    <form class="composer" id="ask-form" autocomplete="off">
+      <div class="field">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="var(--muted)" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+        <input id="q" name="q" placeholder="How do I return a 201 status from a POST endpoint?" maxlength="500" aria-label="Question">
+        <span class="kbd" id="kbd">⌘K</span>
+        <button class="primary" id="ask-btn" type="submit">Ask
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+        </button>
+      </div>
+      <div class="opts">
+        <label class="toggle"><input type="checkbox" id="use-cache" checked> Use cache</label>
+        <span id="cfg" class="mono"></span>
+      </div>
+    </form>
+    <div class="examples" id="examples"></div>
+    <div class="notice" id="offline" hidden>
+      <span class="pill warn">extractive mode</span> No OpenAI key configured: answers are the top cited passages, verbatim.
+    </div>
+    <div id="result"></div>
+  </section>
+
+  <!-- ================= SUMMARIZE ================= -->
+  <section id="v-summarize" hidden>
+    <div class="page-h"><div><h2>Summarize</h2><p>A document or one of its sections, condensed. Long pages run map-reduce in parallel.</p></div></div>
+    <div class="two">
+      <div class="card panel stack">
+        <div>
+          <label class="lbl" for="doc-filter">Document</label>
+          <input class="input" id="doc-filter" placeholder="Filter 179 pages…">
+          <div class="doclist" id="doclist" role="listbox"></div>
+        </div>
+        <div>
+          <label class="lbl" for="sec">Section</label>
+          <select class="input" id="sec"><option value="">Whole document</option></select>
+        </div>
+        <button class="primary" id="sum-btn" disabled>Summarize</button>
+      </div>
+      <div id="sum-out" class="card"><div class="empty"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 6h16M4 12h10M4 18h7"/></svg>Pick a document on the left.</div></div>
+    </div>
+  </section>
+
+  <!-- ================= EXTRACT ================= -->
+  <section id="v-extract" hidden>
+    <div class="page-h"><div><h2>Extract</h2><p>Typed fields pulled from the docs with OpenAI strict JSON-schema output. Missing facts come back as <span class="mono">null</span>, never invented.</p></div></div>
+    <div class="two">
+      <div class="card panel stack">
+        <div>
+          <label class="lbl">Schema</label>
+          <div class="seg" id="schema-seg"></div>
+          <div class="muted" id="schema-desc" style="font-size:12.5px;margin-top:8px"></div>
+        </div>
+        <div>
+          <label class="lbl" for="ex-q">Find the source by question</label>
+          <input class="input" id="ex-q" placeholder="e.g. path parameter with int type">
+        </div>
+        <button class="primary" id="ex-btn">Extract</button>
+        <div class="err" id="ex-err" hidden></div>
+      </div>
+      <div id="ex-out" class="card"><div class="empty"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M8 4H6a2 2 0 00-2 2v4l-2 2 2 2v4a2 2 0 002 2h2M16 4h2a2 2 0 012 2v4l2 2-2 2v4a2 2 0 01-2 2h-2"/></svg>Choose a schema and describe the section.</div></div>
+    </div>
+  </section>
+
+  <!-- ================= METRICS ================= -->
+  <section id="v-metrics" hidden>
+    <div class="page-h">
+      <div><h2>Metrics</h2><p>Live from the PostgreSQL query log (last 24 h), plus the offline retrieval benchmark.</p></div>
+      <button class="ghost" id="m-refresh">Refresh</button>
+    </div>
+    <div class="kpis" id="kpis"></div>
+    <div class="block-h"><h3>Retrieval eval</h3><span class="muted" id="eval-n"></span></div>
+    <div class="card"><table id="eval-t"></table></div>
+    <div class="block-h"><h3>Recent queries</h3><span class="muted">newest first</span></div>
+    <div class="card"><table id="recent-t"></table></div>
+  </section>
+</main>
+<footer><span>DocPilot · FastAPI 0.162.5 + Pydantic v2.14.3 docs</span><span><a href="/docs" class="muted">API</a> · <a href="https://github.com/Arun07AK/docpilot" class="muted">GitHub</a></span></footer>
+<div class="toast" id="toast"></div>
+
+<script>
+const $ = (s, el = document) => el.querySelector(s);
+const $$ = (s, el = document) => [...el.querySelectorAll(s)];
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const fmt = (n, d = 0) => n == null ? "—" : Number(n).toLocaleString(undefined, {maximumFractionDigits: d, minimumFractionDigits: d});
+const ms = n => n == null ? "—" : n < 10 ? `${fmt(n, 1)}` : fmt(n);
+let health = {};
+
+/* ---------------- theme ---------------- */
+try { const t = localStorage.getItem("dp-theme"); if (t) document.documentElement.dataset.theme = t; } catch {}
+$("#theme").onclick = () => {
+  const dark = matchMedia("(prefers-color-scheme: dark)").matches;
+  const cur = document.documentElement.dataset.theme || (dark ? "dark" : "light");
+  const next = cur === "dark" ? "light" : "dark";
+  document.documentElement.dataset.theme = next;
+  try { localStorage.setItem("dp-theme", next); } catch {}
+};
+function toast(msg) { const t = $("#toast"); t.textContent = msg; t.classList.add("on"); setTimeout(() => t.classList.remove("on"), 1400); }
+
+/* ---------------- routing ---------------- */
+function go(view) {
+  $$("nav button").forEach(b => b.setAttribute("aria-selected", b.dataset.go === view));
+  $$("main > section").forEach(s => s.hidden = s.id !== "v-" + view);
+  if (location.hash !== "#" + view) history.replaceState(null, "", "#" + view);
+  if (view === "metrics") loadMetrics();
+  if (view === "summarize") loadDocs();
+  if (view === "ask") setTimeout(() => $("#q").focus(), 0);
+}
+$$("[data-go]").forEach(b => b.addEventListener("click", e => { e.preventDefault(); go(b.dataset.go); }));
+addEventListener("keydown", e => {
+  if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k") { e.preventDefault(); go("ask"); $("#q").select(); }
+  if (e.key === "/" && !/INPUT|TEXTAREA|SELECT/.test(document.activeElement.tagName)) { e.preventDefault(); go("ask"); $("#q").focus(); }
+});
+if (!/Mac/.test(navigator.platform)) $("#kbd").textContent = "Ctrl K";
+
+/* ---------------- health ---------------- */
+async function loadHealth() {
+  try {
+    health = await (await fetch("/healthz")).json();
+    const dot = (id, on) => $(id).className = "dot " + (on ? "on" : "off");
+    dot("#s-index", health.chunks > 0); dot("#s-redis", health.redis); dot("#s-pg", health.postgres); dot("#s-llm", health.llm);
+    $("#s-index-t").textContent = `${health.backend} · ${fmt(health.chunks)} chunks`;
+    $("#s-llm-t").textContent = health.llm ? health.chat_model : "Extractive";
+    $("#cfg").textContent = `${health.backend} · ${health.chunk_tokens}-token chunks · ${health.embedder.split("/").pop()}`;
+    $("#offline").hidden = !!health.llm;
+  } catch { ["#s-index", "#s-redis", "#s-pg", "#s-llm"].forEach(i => $(i).className = "dot off"); }
+}
+
+/* ---------------- ask ---------------- */
+const EXAMPLES = [
+  ["Why does /users/me get matched as a user id?", 0],
+  ["How do I forbid extra fields in a Pydantic model?", 0],
+  ["How can I run code before the app starts receiving requests?", 0],
+  ["How do I return a custom status code from an endpoint?", 0],
+  ["How do I set up Django REST framework permissions?", 1],
+];
+$("#examples").innerHTML = EXAMPLES.map(([t, ooc]) =>
+  `<button class="example${ooc ? " ooc" : ""}" title="${ooc ? "Out of corpus: should be refused" : ""}">${esc(t)}</button>`).join("");
+$$(".example").forEach(b => b.onclick = () => { $("#q").value = b.textContent; ask(); });
+$("#ask-form").onsubmit = e => { e.preventDefault(); ask(); };
+
+const ICON = {
+  done: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.2"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>',
+  refuse: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.2"><path d="M6 6l12 12M18 6L6 18"/></svg>',
+  rewrite: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M4 12a8 8 0 0114-5.3L20 9M20 4v5h-5"/></svg>',
+};
+
+function stepDesc(s) {
+  switch (s.step) {
+    case "retrieve": return s.top?.length ? `${s.k} chunks · top ${s.top[0].score.toFixed(2)} <span class="mono">${esc(s.top[0].heading.split(" > ").pop())}</span>` : "no chunks";
+    case "grade": return s.error ? "grader error → refuse" : `${s.relevant.length} relevant · ${s.sufficient ? "sufficient" : "insufficient"}${s.mode === "threshold" ? " (score threshold)" : ""}`;
+    case "rewrite": return `→ “${esc(s.query)}”`;
+    case "answer": return s.rejected ? "citations failed validation" : s.mode === "extractive" ? "verbatim passages" : `cited ${s.cited?.length ?? 0} passage${s.cited?.length === 1 ? "" : "s"}`;
+    case "refuse": return "insufficient evidence";
+    default: return "";
+  }
+}
+
+function renderStep(s) {
+  const cls = s.step === "refuse" ? "refuse" : s.step === "rewrite" ? "rewrite" : "done";
+  return `<li class="step ${cls}"><span class="ico">${ICON[cls] || ICON.done}</span>
+    <div><div class="sname">${esc(s.step)}</div><div class="sdesc">${stepDesc(s)}</div></div>
+    <span class="sms">${ms(s.ms)}ms</span></li>`;
+}
+
+function md(text) {
+  // tiny, safe markdown: fenced code, inline code, bold, paragraphs, citation chips
+  const parts = String(text).split(/```(\w*)\n?([\s\S]*?)```/g);
+  let html = "";
+  for (let i = 0; i < parts.length; i++) {
+    if (i % 3 === 1) continue;
+    if (i % 3 === 2) { html += `<pre><code>${esc(parts[i].replace(/\n$/, ""))}</code></pre>`; continue; }
+    html += parts[i].split(/\n{2,}/).filter(p => p.trim()).map(p => "<p>" + esc(p.trim())
+      .replace(/`([^`]+)`/g, "<code>$1</code>")
+      .replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>")
+      .replace(/\n/g, "<br>")
+      .replace(/\[(\d+)\]/g, '<a class="cite" data-n="$1" href="#src-$1">$1</a>') + "</p>").join("");
+  }
+  return html;
+}
+
+function sourceCard(c) {
+  const parts = c.heading_path.split(" > ");
+  const crumb = parts.length > 1 ? `<span>${esc(parts.slice(0, -1).join(" › "))} › </span>${esc(parts.at(-1))}` : esc(parts[0]);
+  return `<div class="card src" id="src-${c.n}" data-n="${c.n}">
+    <span class="n">${c.n}</span>
+    <div style="min-width:0">
+      <div class="crumb">${crumb}</div>
+      <div class="path mono">${esc(c.doc_path)}</div>
+      <div class="snippet">${esc(c.snippet)}</div>
+      <div class="srcfoot">
+        <span class="score mono"><i style="--w:${Math.max(0, Math.min(1, c.score)) * 100}%"></i>${c.score.toFixed(2)}</span>
+        <a class="ext" href="${esc(c.url)}" target="_blank" rel="noopener">Open in docs ↗</a>
+      </div>
+    </div></div>`;
+}
+
+function wireCites(root) {
+  $$(".cite", root).forEach(a => {
+    const n = a.dataset.n, card = () => $(`#src-${n}`);
+    a.onmouseenter = () => { card()?.classList.add("hl"); $$(`.cite[data-n="${n}"]`).forEach(x => x.classList.add("hl")); };
+    a.onmouseleave = () => { card()?.classList.remove("hl"); $$(".cite.hl").forEach(x => x.classList.remove("hl")); };
+    a.onclick = e => { e.preventDefault(); card()?.scrollIntoView({behavior: "smooth", block: "center"}); };
+  });
+  $$(".src", root).forEach(s => {
+    s.onmouseenter = () => $$(`.cite[data-n="${s.dataset.n}"]`).forEach(x => x.classList.add("hl"));
+    s.onmouseleave = () => $$(".cite.hl").forEach(x => x.classList.remove("hl"));
+  });
+}
+
+function shell(question) {
+  $("#result").innerHTML = `<div class="result">
+    <div>
+      <div class="card answer" id="ans"><div class="qline">${esc(question)}</div>
+        <div class="skeleton" style="width:92%"></div><div class="skeleton" style="width:84%"></div><div class="skeleton" style="width:60%"></div></div>
+      <div id="srcs"></div>
+    </div>
+    <aside class="side"><h4>Agent trace</h4>
+      <div class="card trace"><ol class="steps" id="steps"><li class="step run"><span class="ico"></span><div><div class="sname">retrieve</div><div class="sdesc">embedding question…</div></div><span class="sms"></span></li></ol>
+      <div class="summary-grid" id="runsum" hidden></div></div>
+    </aside></div>`;
+}
+
+let inflight = null;
+async function ask() {
+  const question = $("#q").value.trim();
+  if (question.length < 3) return $("#q").focus();
+  inflight?.abort(); inflight = new AbortController();
+  document.body.classList.add("asked");
+  $("#ask-btn").disabled = true;
+  shell(question);
+  const steps = [];
+  try {
+    const res = await fetch("/ask/stream", {method: "POST", headers: {"content-type": "application/json"},
+      body: JSON.stringify({question, use_cache: $("#use-cache").checked}), signal: inflight.signal});
+    if (!res.ok) throw new Error((await res.json()).detail?.[0]?.msg || res.statusText);
+    const reader = res.body.getReader(), dec = new TextDecoder();
+    let buf = "";
+    for (;;) {
+      const {value, done} = await reader.read();
+      if (done) break;
+      buf += dec.decode(value, {stream: true});
+      let i;
+      while ((i = buf.indexOf("\n\n")) >= 0) {
+        const block = buf.slice(0, i); buf = buf.slice(i + 2);
+        const ev = block.match(/^event: (\w+)/m)?.[1], data = JSON.parse(block.match(/^data: (.*)$/m)?.[1] || "{}");
+        if (ev === "step") { steps.push(data); drawSteps(steps, true); }
+        if (ev === "result") drawResult(data, steps);
+        if (ev === "error") throw new Error(data.detail);
+      }
+    }
+  } catch (err) {
+    if (err.name !== "AbortError") $("#ans").innerHTML = `<div class="qline">${esc(question)}</div><div class="err">Request failed: ${esc(err.message)}</div>`;
+  } finally { $("#ask-btn").disabled = false; }
+}
+
+function drawSteps(steps, running) {
+  const next = {retrieve: "grade", grade: "answer", rewrite: "retrieve", answer: null, refuse: null}[steps.at(-1)?.step];
+  $("#steps").innerHTML = steps.map(renderStep).join("") +
+    (running && next ? `<li class="step run"><span class="ico"></span><div><div class="sname">${next}</div><div class="sdesc">working…</div></div><span class="sms"></span></li>` : "");
+}
+
+function drawResult(r, streamed) {
+  const steps = r.trace?.length ? r.trace : streamed;
+  drawSteps(steps, false);
+  if (r.cached) $("#steps").insertAdjacentHTML("afterbegin",
+    `<li class="step done"><span class="ico">${ICON.done}</span><div><div class="sname">cache</div><div class="sdesc">served from ${esc(health.cache || "cache")} · trace from the original run</div></div><span class="sms">${ms(r.latency_ms)}ms</span></li>`);
+  const tok = (r.usage?.prompt_tokens || 0) + (r.usage?.completion_tokens || 0);
+  const sum = $("#runsum"); sum.hidden = false;
+  sum.innerHTML = `<div><b>${ms(r.latency_ms)}<small>ms</small></b><span>latency</span></div>
+    <div><b>${r.cached ? "HIT" : "MISS"}</b><span>cache</span></div>
+    <div><b>${fmt(tok)}</b><span>tokens</span></div>
+    <div><b>${r.rewrites}</b><span>rewrites</span></div>`;
+
+  const meta = `<div class="metaline">
+      <span class="pill ${r.cached ? "hit" : "miss"}">${r.cached ? "CACHE HIT" : "CACHE MISS"}</span>
+      <span><b>${ms(r.latency_ms)} ms</b></span>
+      ${r.mode === "extractive" ? '<span class="pill warn">extractive</span>' : ""}
+      <span>${fmt(tok)} tokens</span>
+      <span>request <span class="mono copy" title="Copy request id" data-copy="${esc(r.request_id)}">${esc(r.request_id)}</span></span>
+    </div>`;
+
+  if (r.refused) {
+    $("#ans").className = "card answer refusal";
+    $("#ans").innerHTML = `<div class="qline">${esc(r.question)}</div>
+      <h3><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--warn)" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v6M12 16.5v.5"/></svg>Insufficient evidence</h3>
+      <p>The indexed FastAPI and Pydantic docs don't answer this, so DocPilot won't guess.${r.rewrites ? " It also tried a rewritten query." : ""}</p>
+      ${r.nearest?.length ? `<div class="nearest"><div class="muted" style="font-size:12px;margin-bottom:2px">Closest sections found</div>${r.nearest.map(n =>
+        `<a href="#" onclick="return false"><span>${esc(n.heading_path)}</span><span class="mono muted">${n.score.toFixed(2)}</span></a>`).join("")}</div>` : ""}
+      ${meta}`;
+    $("#srcs").innerHTML = "";
+  } else {
+    $("#ans").className = "card answer";
+    $("#ans").innerHTML = `<div class="qline">${esc(r.question)}</div><div class="answer-body">${md(r.answer)}</div>${meta}`;
+    $("#srcs").innerHTML = `<div class="sources-h"><h4>Sources</h4><span class="muted" style="font-size:12px">${r.citations.length} cited</span></div>
+      <div class="sources">${r.citations.map(sourceCard).join("")}</div>`;
+  }
+  $$("[data-copy]").forEach(el => el.onclick = () => { navigator.clipboard?.writeText(el.dataset.copy); toast("Request id copied"); });
+  wireCites(document);
+}
+
+/* ---------------- summarize ---------------- */
+let docs = null, curDoc = null;
+async function loadDocs() {
+  if (docs) return;
+  $("#doclist").innerHTML = `<div style="padding:12px"><div class="skeleton"></div><div class="skeleton"></div></div>`;
+  docs = await (await fetch("/documents")).json();
+  $("#doc-filter").placeholder = `Filter ${docs.length} pages…`;
+  drawDocs();
+}
+function drawDocs() {
+  const f = $("#doc-filter").value.toLowerCase();
+  const groups = {fastapi: [], pydantic: []};
+  docs.filter(d => !f || d.title.toLowerCase().includes(f) || d.doc_path.includes(f)).forEach(d => groups[d.doc_path.split("/")[0]]?.push(d));
+  $("#doclist").innerHTML = Object.entries(groups).filter(([, v]) => v.length).map(([g, v]) =>
+    `<div class="docgrp">${g === "fastapi" ? "FastAPI" : "Pydantic"} · ${v.length}</div>` + v.map(d =>
+      `<button class="doc" role="option" data-p="${esc(d.doc_path)}" aria-selected="${curDoc?.doc_path === d.doc_path}">${esc(d.title)}<small>${esc(d.doc_path.split("/").slice(1).join("/"))}</small></button>`).join("")).join("")
+    || `<div class="empty" style="padding:24px">No matches</div>`;
+  $$(".doc").forEach(b => b.onclick = () => {
+    curDoc = docs.find(d => d.doc_path === b.dataset.p);
+    $$(".doc").forEach(x => x.setAttribute("aria-selected", x === b));
+    const top = curDoc.sections[0].split(" > ")[0];
+    $("#sec").innerHTML = `<option value="">Whole document · ${curDoc.sections.length} sections</option>` + curDoc.sections.filter(s => s !== top)
+      .map(s => `<option value="${esc(s)}">${esc(s.split(" > ").slice(1).join(" › "))}</option>`).join("");
+    $("#sum-btn").disabled = false;
+  });
+}
+$("#doc-filter").oninput = () => docs && drawDocs();
+$("#sum-btn").onclick = async () => {
+  if (!curDoc) return;
+  const out = $("#sum-out"), heading = $("#sec").value || null;
+  $("#sum-btn").disabled = true;
+  out.innerHTML = `<div class="out"><h3>${esc(curDoc.title)}</h3><div class="skeleton" style="width:95%"></div><div class="skeleton" style="width:88%"></div><div class="skeleton" style="width:70%"></div></div>`;
+  try {
+    const r = await fetch("/summarize", {method: "POST", headers: {"content-type": "application/json"}, body: JSON.stringify({doc_path: curDoc.doc_path, heading})});
+    const b = await r.json();
+    if (!r.ok) throw new Error(b.detail);
+    const tok = (b.usage?.prompt_tokens || 0) + (b.usage?.completion_tokens || 0);
+    out.innerHTML = `<div class="out">
+      <h3>${esc(heading ? heading.split(" > ").at(-1) : curDoc.title)}</h3>
+      <div class="mono muted">${esc(b.doc_path)}</div>
+      <p class="lead">${esc(b.summary)}</p>
+      <ul class="points">${b.key_points.map(p => `<li>${md(p).replace(/^<p>|<\/p>$/g, "")}</li>`).join("")}</ul>
+      <div class="metaline"><span class="pill ${b.cached ? "hit" : "miss"}">${b.cached ? "CACHE HIT" : "CACHE MISS"}</span>
+        <span><b>${ms(b.latency_ms)} ms</b></span><span>${b.chunks} chunks · ${b.map_steps} map step${b.map_steps === 1 ? "" : "s"}</span><span>${fmt(tok)} tokens</span>
+        <a class="ext" href="${esc(b.url)}" target="_blank" rel="noopener">Open in docs ↗</a></div></div>`;
+  } catch (e) { out.innerHTML = `<div class="out"><div class="err">${esc(e.message)}</div></div>`; }
+  $("#sum-btn").disabled = false;
+};
+
+/* ---------------- extract ---------------- */
+let schemas = {}, curSchema = "endpoint";
+const SCHEMA_LABEL = {endpoint: "Endpoint", config_options: "Config options", error: "Error"};
+const SCHEMA_HINT = {endpoint: "path parameter with int type", config_options: "model_config options for strictness and extra fields", error: "url_too_long validation error"};
+async function loadSchemas() {
+  schemas = await (await fetch("/extract/schemas")).json();
+  $("#schema-seg").innerHTML = Object.keys(schemas).map(k => `<button data-k="${k}" aria-selected="${k === curSchema}">${SCHEMA_LABEL[k] || k}</button>`).join("");
+  $$("#schema-seg button").forEach(b => b.onclick = () => { curSchema = b.dataset.k; $$("#schema-seg button").forEach(x => x.setAttribute("aria-selected", x === b)); syncSchema(); });
+  syncSchema();
+}
+function syncSchema() { $("#schema-desc").textContent = schemas[curSchema]?.description || ""; $("#ex-q").placeholder = "e.g. " + SCHEMA_HINT[curSchema]; }
+function jsonHTML(v, ind = 0) {
+  const pad = "  ".repeat(ind), pad1 = "  ".repeat(ind + 1);
+  if (v === null) return '<span class="j-null">null</span>';
+  if (typeof v === "string") return `<span class="j-s">"${esc(v)}"</span>`;
+  if (typeof v === "number") return `<span class="j-n">${v}</span>`;
+  if (typeof v === "boolean") return `<span class="j-b">${v}</span>`;
+  if (Array.isArray(v)) return v.length ? "[\n" + v.map(x => pad1 + jsonHTML(x, ind + 1)).join(",\n") + "\n" + pad + "]" : "[]";
+  const ks = Object.keys(v);
+  return ks.length ? "{\n" + ks.map(k => `${pad1}<span class="j-k">"${esc(k)}"</span>: ${jsonHTML(v[k], ind + 1)}`).join(",\n") + "\n" + pad + "}" : "{}";
+}
+$("#ex-q").onkeydown = e => { if (e.key === "Enter") $("#ex-btn").click(); };
+$("#ex-btn").onclick = async () => {
+  const q = $("#ex-q").value.trim() || SCHEMA_HINT[curSchema], out = $("#ex-out");
+  $("#ex-btn").disabled = true; $("#ex-err").hidden = true;
+  out.innerHTML = `<div class="out"><div class="skeleton" style="width:40%"></div><div class="skeleton" style="width:90%;height:120px"></div></div>`;
+  try {
+    const r = await fetch("/extract", {method: "POST", headers: {"content-type": "application/json"}, body: JSON.stringify({schema: curSchema, query: q})});
+    const b = await r.json();
+    if (!r.ok) throw new Error(b.detail);
+    const tok = (b.usage?.prompt_tokens || 0) + (b.usage?.completion_tokens || 0);
+    out.innerHTML = `<div class="out"><div class="row" style="justify-content:space-between;margin-bottom:14px">
+        <h3>${SCHEMA_LABEL[b.schema]}</h3><span class="pill">${esc(b.schema)}</span></div>
+      <pre class="json">${jsonHTML(b.data)}</pre>
+      <div class="sources-h" style="margin-top:22px"><h4>From</h4></div><div class="sources">${b.sources.map(sourceCard).join("")}</div>
+      <div class="metaline"><span class="pill ${b.cached ? "hit" : "miss"}">${b.cached ? "CACHE HIT" : "CACHE MISS"}</span><span><b>${ms(b.latency_ms)} ms</b></span><span>${fmt(tok)} tokens</span></div></div>`;
+  } catch (e) { out.innerHTML = `<div class="empty">Nothing extracted.</div>`; $("#ex-err").textContent = e.message; $("#ex-err").hidden = false; }
+  $("#ex-btn").disabled = false;
+};
+
+/* ---------------- metrics ---------------- */
+async function loadMetrics() {
+  const [m, bench] = await Promise.all([fetch("/metrics").then(r => r.ok ? r.json() : null), fetch("/bench").then(r => r.json())]);
+  const pct = v => v == null ? "—" : fmt(v * 100, 0);
+  const k = (label, val, unit, note = "") => `<div class="kpi"><span>${label}</span><b>${val}<small>${unit}</small></b><em>${note}</em></div>`;
+  $("#kpis").innerHTML = m ? [
+    k("Queries", fmt(m.queries), "", `${m.backend} · ${fmt(m.chunks)} chunks`),
+    k("Cache hit rate", pct(m.cache_hit_rate), "%", `serving from ${m.cache_backend}`),
+    k("p50 · cache miss", ms(m.p50_miss_ms), "ms", `p95 ${ms(m.p95_miss_ms)} ms`),
+    k("p50 · cache hit", ms(m.p50_hit_ms), "ms", m.p50_hit_ms && m.p50_miss_ms ? `${fmt(m.p50_miss_ms / m.p50_hit_ms)}× faster` : ""),
+    k("p50 · all", ms(m.p50_ms), "ms", `p95 ${ms(m.p95_ms)} ms`),
+    k("Refusal rate", pct(m.refusal_rate), "%", "insufficient evidence"),
+    k("Prompt tokens", fmt(m.prompt_tokens), "", ""),
+    k("Completion tokens", fmt(m.completion_tokens), "", ""),
+  ].join("") : `<div class="kpi" style="grid-column:1/-1"><span>Metrics unavailable</span></div>`;
+
+  const rows = bench.retrieval || [];
+  $("#eval-n").textContent = rows.length ? `${rows[0].n} labelled questions · k = ${rows[0].k}` : "run python -m eval.retrieval_eval";
+  const best = Math.max(...rows.map(r => r.recall), 0);
+  $("#eval-t").innerHTML = `<thead><tr><th>Backend</th><th>Embeddings</th><th class="num">Chunk</th><th style="width:30%">Recall@${rows[0]?.k ?? 5}</th><th style="width:22%">MRR</th><th class="num">Chunks</th><th class="num">Search / query</th></tr></thead><tbody>` +
+    rows.map(r => `<tr><td><b style="font-weight:500">${r.backend === "faiss" ? "FAISS" : "Chroma"}</b></td><td class="mono muted">${esc(r.provider)}</td><td class="num">${r.chunk_tokens}</td>
+      <td><div class="meter"><i style="--w:${r.recall * 100}%"></i><span class="mono" style="${r.recall === best ? "font-weight:600" : ""}">${r.recall.toFixed(2)}</span></div></td>
+      <td><div class="meter"><i style="--w:${r.mrr * 100}%"></i><span class="mono">${r.mrr.toFixed(3)}</span></div></td>
+      <td class="num">${fmt(r.chunks)}</td><td class="num">${r.search_ms.toFixed(2)} ms</td></tr>`).join("") + "</tbody>";
+
+  const rec = m?.recent || [];
+  $("#recent-t").innerHTML = `<thead><tr><th>Endpoint</th><th>Question</th><th>Cache</th><th>Outcome</th><th class="num">Latency</th></tr></thead><tbody>` +
+    (rec.length ? rec.map(r => `<tr><td class="mono">${esc(r.endpoint)}</td><td><div class="trunc">${esc(r.question)}</div></td>
+      <td><span class="pill ${r.cache_hit ? "hit" : "miss"}">${r.cache_hit ? "HIT" : "MISS"}</span></td>
+      <td>${r.refused ? '<span class="pill warn">refused</span>' : r.endpoint === "ask" ? '<span class="muted">answered</span>' : '<span class="muted">ok</span>'}${r.rewrites ? ' <span class="muted">· rewrote</span>' : ""}</td>
+      <td class="num">${ms(r.latency_ms)} ms</td></tr>`).join("") : `<tr><td colspan="5" class="muted" style="text-align:center;padding:28px">No queries yet. Ask something.</td></tr>`) + "</tbody>";
+}
+$("#m-refresh").onclick = loadMetrics;
+
+/* ---------------- boot ---------------- */
+loadHealth(); loadSchemas();
+setInterval(loadHealth, 20000);
+const route = () => go((location.hash || "#ask").slice(1).replace(/[^a-z]/g, "") || "ask");
+addEventListener("hashchange", route); route();
+</script>
+</body>
+</html>

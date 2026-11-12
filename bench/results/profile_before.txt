@@ -1,0 +1,33 @@
+         6806091 function calls (6665324 primitive calls) in 23.673 seconds
+
+   Ordered by: cumulative time
+   List reduced from 1063 to 25 due to restriction <25>
+
+   ncalls  tottime  percall  cumtime  percall filename:lineno(function)
+       42    0.000    0.000   22.992    0.547 /Users/arunak/docpilot/.venv/lib/python3.12/site-packages/sentence_transformers/sentence_transformer/model.py:767(encode)
+       42    0.000    0.000   22.991    0.547 /Users/arunak/docpilot/.venv/lib/python3.12/site-packages/torch/utils/_contextlib.py:154(inference_mode)
+       42    0.002    0.000   22.940    0.546 /Users/arunak/docpilot/.venv/lib/python3.12/site-packages/sentence_transformers/sentence_transformer/model.py:934(_inference)
+  4872/42    0.009    0.000   22.184    0.528 /Users/arunak/docpilot/.venv/lib/python3.12/site-packages/torch/nn/modules/module.py:1783(_wrapped_call_impl)
+  4872/42    0.230    0.000   22.184    0.528 /Users/arunak/docpilot/.venv/lib/python3.12/site-packages/torch/nn/modules/module.py:1791(_call_impl)
+       42    0.000    0.000   22.184    0.528 /Users/arunak/docpilot/.venv/lib/python3.12/site-packages/sentence_transformers/base/model.py:627(forward)
+       42    0.001    0.000   22.120    0.527 /Users/arunak/docpilot/.venv/lib/python3.12/site-packages/sentence_transformers/base/modules/transformer.py:1636(forward)
+       42    0.000    0.000   22.119    0.527 /Users/arunak/docpilot/.venv/lib/python3.12/site-packages/transformers/utils/generic.py:1019(wrapper)
+       42    0.011    0.000   22.118    0.527 /Users/arunak/docpilot/.venv/lib/python3.12/site-packages/transformers/utils/output_capturing.py:250(wrapper)
+       42    0.001    0.000   22.101    0.526 /Users/arunak/docpilot/.venv/lib/python3.12/site-packages/transformers/models/bert/modeling_bert.py:620(forward)
+      252    0.001    0.000   21.791    0.086 /Users/arunak/docpilot/.venv/lib/python3.12/site-packages/transformers/modeling_layers.py:82(__call__)
+      252    0.001    0.000   21.738    0.086 /Users/arunak/docpilot/.venv/lib/python3.12/site-packages/transformers/models/bert/modeling_bert.py:374(forward)
+       42    0.042    0.001   21.657    0.516 /Users/arunak/docpilot/.venv/lib/python3.12/site-packages/transformers/models/bert/modeling_bert.py:425(forward)
+     1554    0.002    0.000   13.669    0.009 /Users/arunak/docpilot/.venv/lib/python3.12/site-packages/torch/nn/modules/linear.py:130(forward)
+     1554   13.666    0.009   13.666    0.009 {built-in method torch._C._nn.linear}
+      252    0.192    0.001   11.282    0.045 /Users/arunak/docpilot/.venv/lib/python3.12/site-packages/transformers/pytorch_utils.py:124(apply_chunking_to_forward)
+      252    0.001    0.000   11.076    0.044 /Users/arunak/docpilot/.venv/lib/python3.12/site-packages/transformers/models/bert/modeling_bert.py:413(feed_forward_chunk)
+      252    0.049    0.000   10.454    0.041 /Users/arunak/docpilot/.venv/lib/python3.12/site-packages/transformers/models/bert/modeling_bert.py:304(forward)
+      252    0.007    0.000    8.349    0.033 /Users/arunak/docpilot/.venv/lib/python3.12/site-packages/transformers/models/bert/modeling_bert.py:164(forward)
+    87/11    0.032    0.000    7.182    0.653 /Users/arunak/docpilot/.venv/lib/python3.12/site-packages/torch/autograd/grad_mode.py:294(__exit__)
+      252    0.211    0.001    6.576    0.026 /Users/arunak/docpilot/.venv/lib/python3.12/site-packages/transformers/models/bert/modeling_bert.py:334(forward)
+      4/3    0.000    0.000    4.852    1.617 /Users/arunak/docpilot/.venv/lib/python3.12/site-packages/sentence_transformers/util/decorators.py:34(wrapper)
+      252    0.003    0.000    4.511    0.018 /Users/arunak/docpilot/.venv/lib/python3.12/site-packages/transformers/integrations/sdpa_attention.py:80(sdpa_attention_forward)
+      252    4.505    0.018    4.505    0.018 {built-in method torch._C._nn.scaled_dot_product_attention}
+      252    0.318    0.001    4.497    0.018 /Users/arunak/docpilot/.venv/lib/python3.12/site-packages/transformers/models/bert/modeling_bert.py:347(forward)
+
+

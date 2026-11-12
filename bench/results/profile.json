@@ -1,0 +1,38 @@
+{
+  "before": {
+    "sort_by_length": false,
+    "batch_size": 64,
+    "chunk_tokens": 256,
+    "chunks": 2632,
+    "runs": 3,
+    "median": {
+      "total_s": 23.428,
+      "parse_chunk_s": 0.291,
+      "embed_s": 23.119,
+      "index_s": 0.014
+    },
+    "all_total_s": [
+      23.428,
+      23.709,
+      23.0
+    ]
+  },
+  "after": {
+    "sort_by_length": true,
+    "batch_size": 64,
+    "chunk_tokens": 256,
+    "chunks": 2632,
+    "runs": 3,
+    "median": {
+      "total_s": 18.89,
+      "parse_chunk_s": 0.293,
+      "embed_s": 18.567,
+      "index_s": 0.014
+    },
+    "all_total_s": [
+      18.734,
+      18.89,
+      18.915
+    ]
+  }
+}
