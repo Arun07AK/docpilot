@@ -1,0 +1,20 @@
+{"id": "o01", "question": "How do I squash my Django migrations after renaming a field on a model?", "kind": "unrelated"}
+{"id": "o02", "question": "How do I register a Flask blueprint so all its routes live under /api/v1?", "kind": "unrelated"}
+{"id": "o03", "question": "Why does my React useEffect run twice on mount in development?", "kind": "unrelated"}
+{"id": "o04", "question": "How do I make a Kubernetes HorizontalPodAutoscaler scale on a custom Prometheus metric?", "kind": "unrelated"}
+{"id": "o05", "question": "When should I run VACUUM FULL instead of a plain VACUUM in PostgreSQL?", "kind": "unrelated"}
+{"id": "o06", "question": "How do I set up a GitHub Actions matrix that tests against several Node.js versions?", "kind": "unrelated"}
+{"id": "o07", "question": "In Rust, when should I use Rc<T> instead of Box<T>?", "kind": "unrelated"}
+{"id": "o08", "question": "How do I write a Terraform module that creates an S3 bucket with versioning enabled?", "kind": "unrelated"}
+{"id": "o09", "question": "How do I compute a rolling 7-day mean per user with pandas groupby?", "kind": "unrelated"}
+{"id": "o10", "question": "How do I expose custom health indicators through Spring Boot Actuator?", "kind": "unrelated"}
+{"id": "o11", "question": "What is the decorator for FastAPI's built-in per-IP rate limiting, and what is its default limit?", "kind": "near_miss"}
+{"id": "o12", "question": "How do I register a recurring cron-style job with FastAPI's built-in scheduler?", "kind": "near_miss"}
+{"id": "o13", "question": "In the TechEmpower benchmarks, exactly how many requests per second does FastAPI handle compared with Litestar?", "kind": "near_miss"}
+{"id": "o14", "question": "How do I enable Brotli compression with FastAPI's built-in BrotliMiddleware?", "kind": "near_miss"}
+{"id": "o15", "question": "How many bytes of memory does a Pydantic BaseModel instance use compared with an equivalent attrs class?", "kind": "near_miss"}
+{"id": "o16", "question": "How do I turn on permessage-deflate compression for FastAPI WebSocket connections?", "kind": "near_miss"}
+{"id": "o17", "question": "How do I serve gRPC services from my FastAPI app using its built-in gRPC router?", "kind": "near_miss"}
+{"id": "o18", "question": "Which Pydantic release added the msgspec validation backend, and how do I switch a model to it?", "kind": "near_miss"}
+{"id": "o19", "question": "How do I configure the circuit breaker that FastAPI applies to outgoing HTTP calls made from dependencies?", "kind": "near_miss"}
+{"id": "o20", "question": "In which Pydantic release, and on what date, was support for Python 3.8 dropped?", "kind": "near_miss"}

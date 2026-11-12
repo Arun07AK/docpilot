@@ -1,0 +1,18 @@
+{
+  "256": {
+    "files": 204,
+    "sections": 1580,
+    "chunks": 2723,
+    "tokens": 407620,
+    "serial_s": 0.36,
+    "pool_s": 0.476
+  },
+  "512": {
+    "files": 204,
+    "sections": 1580,
+    "chunks": 1900,
+    "tokens": 394609,
+    "serial_s": 0.215,
+    "pool_s": 0.39
+  }
+}

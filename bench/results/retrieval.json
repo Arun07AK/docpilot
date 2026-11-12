@@ -1,0 +1,46 @@
+[
+  {
+    "backend": "faiss",
+    "provider": "local",
+    "chunk_tokens": 256,
+    "k": 5,
+    "recall": 0.74,
+    "mrr": 0.596,
+    "n": 50,
+    "chunks": 2632,
+    "search_ms": 0.093
+  },
+  {
+    "backend": "chroma",
+    "provider": "local",
+    "chunk_tokens": 256,
+    "k": 5,
+    "recall": 0.74,
+    "mrr": 0.596,
+    "n": 50,
+    "chunks": 2632,
+    "search_ms": 1.757
+  },
+  {
+    "backend": "faiss",
+    "provider": "local",
+    "chunk_tokens": 512,
+    "k": 5,
+    "recall": 0.76,
+    "mrr": 0.62,
+    "n": 50,
+    "chunks": 1837,
+    "search_ms": 0.049
+  },
+  {
+    "backend": "chroma",
+    "provider": "local",
+    "chunk_tokens": 512,
+    "k": 5,
+    "recall": 0.76,
+    "mrr": 0.62,
+    "n": 50,
+    "chunks": 1837,
+    "search_ms": 1.517
+  }
+]
